@@ -1,3 +1,6 @@
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { AiFillEdit } from 'react-icons/ai';
@@ -10,19 +13,19 @@ const DropdownsComponent: React.FC = () => {
   const [selectedZona, setSelectedZona] = useState<string | null>(null);
   const [filteredDepartamentos, setFilteredDepartamentos] = useState<string[]>([]);
   const [filteredMunicipios, setFilteredMunicipios] = useState<string[]>([]);
-  const [viviendas, setViviendas] = useState([
-    { id: 1, direccion: 'Calle 123', capacidad: 4, niveles: 2 },
-    { id: 2, direccion: 'Avenida 456', capacidad: 6, niveles: 3 },
-    { id: 3, direccion: 'Calle 789', capacidad: 3, niveles: 1 },
-    { id: 4, direccion: 'Avenida 987', capacidad: 5, niveles: 2 },
-  ]);
-  const [selectedVivienda, setSelectedVivienda] = useState<{
-    index: number;
-    direccion: string;
-    capacidad: number;
-    niveles: number;
-  } | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  // const [viviendas, setViviendas] = useState([
+  //   { id: 1, direccion: 'Calle 123', capacidad: 4, niveles: 2 },
+  //   { id: 2, direccion: 'Avenida 456', capacidad: 6, niveles: 3 },
+  //   { id: 3, direccion: 'Calle 789', capacidad: 3, niveles: 1 },
+  //   { id: 4, direccion: 'Avenida 987', capacidad: 5, niveles: 2 },
+  // ]);
+  // const [selectedVivienda, setSelectedVivienda] = useState<{
+  //   index: number;
+  //   direccion: string;
+  //   capacidad: number;
+  //   niveles: number;
+  // } | null>(null);
+  // const [isEditing, setIsEditing] = useState(false);
 
   type MunicipiosList = {
     [key: string]: { municipios: string[]; zonas: string[] };
@@ -49,7 +52,7 @@ const DropdownsComponent: React.FC = () => {
     setMunicipios(municipiosList[selectedDepartamento]?.municipios || []);
   };
 
-  const handleMunicipioSelect = (municipio: string) => {
+  const handleMunicipioSelect = (_municipio: string) => {
     setSelectedZona(null); // Reset the selected zone when a new municipality is selected
     setZonas(municipiosList[departamento!]?.zonas || []);
   };
@@ -177,7 +180,7 @@ const HousingTable: React.FC<{ zonaSeleccionada: string | null }> = ({ zonaSelec
     capacidad: number;
     niveles: number;
   } | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  // const [isEditing, setIsEditing] = useState(false);
 
   const filteredViviendas = zonaSeleccionada
     ? viviendas.filter((vivienda) => vivienda.direccion.includes(zonaSeleccionada))

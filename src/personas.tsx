@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { AiFillEdit, AiOutlineSearch } from 'react-icons/ai';
+import { AiFillEdit } from 'react-icons/ai';
 import { MdDelete } from 'react-icons/md';
 
 const DropdownsComponent: React.FC = () => {
@@ -199,6 +200,7 @@ const DropdownsComponent: React.FC = () => {
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const PersonTable: React.FC<{ personas: any[] }> = ({ personas }) => {
   return (
     <table className="table">

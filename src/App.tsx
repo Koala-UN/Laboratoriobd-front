@@ -1,3 +1,5 @@
+ 
+ 
 import 'bootstrap/dist/css/bootstrap.min.css'; // Importa Bootstrap CSS
 import 'bootstrap/dist/js/bootstrap.bundle.min'; // Importa Bootstrap JS
 import './App.css'; // Personalizaciones de estilo adicionales
