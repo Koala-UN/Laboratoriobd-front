@@ -1,0 +1,59 @@
+/* Estilos para el Navbar */
+.navbar {
+  width: 100%; /* Ocupa todo el ancho disponible */
+  margin: 0; /* Elimina cualquier margen */
+}
+
+.navbar-brand,
+.nav-link {
+  color: #000; /* Cambia el color por defecto a negro */
+}
+
+.nav-link:hover {
+  color: #646cff; /* Cambia el color del enlace cuando se pasa el ratón sobre él */
+}
+
+.nav-item.dropdown .dropdown-menu {
+  margin-top: 0; /* Elimina el margen superior del dropdown */
+}
+
+.form-inline {
+  width: 100%; /* Asegura que el formulario de búsqueda ocupe todo el ancho */
+  justify-content: flex-end; /* Alinea el formulario a la derecha */
+}
+
+.form-control {
+  width: 75%; /* Ajusta el ancho del campo de búsqueda */
+  margin-right: 0.5rem; /* Ajusta el margen derecho */
+}
+
+.btn {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.btn:hover {
+  border-color: #646cff;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+
+  .nav-link:hover {
+    color: #747bff;
+  }
+
+  .btn {
+    background-color: #f9f9f9;
+  }
+}
