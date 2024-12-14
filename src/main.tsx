@@ -4,15 +4,42 @@ import { createRoot } from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Asegúrate de importar Bootstrap CSS
 import NavbarComponent from './App';
 
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
-import DropdownsComponent from './personas.tsx';
+import Viviendas from './Viviendas.tsx';
+import Personas from './personas.tsx';
+import Alcalde from './alcalde.tsx';
 
 const rootElement = document.getElementById('root')!;
 const root = createRoot(rootElement);
 
 root.render(
   <>
-    <NavbarComponent />
-    <DropdownsComponent/>
-  </>,
+  <Router>
+        <Routes>
+
+          <Route path="/personas" element={
+          <>
+            <NavbarComponent/>
+            <Personas/>
+            </>
+            } ></Route> 
+           <Route path="/viviendas" element={
+          <>
+            <NavbarComponent/>
+            <Viviendas/>
+            </>
+            } ></Route>
+    
+        <Route path="/alcalde" element={
+          <>
+            <NavbarComponent/>
+            <Alcalde/>
+            </>
+            } >
+
+            </Route>
+        </Routes>
+        </Router>
+  </>
 );

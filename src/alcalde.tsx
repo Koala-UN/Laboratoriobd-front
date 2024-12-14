@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
+
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { AiOutlineEdit } from 'react-icons/ai';
@@ -9,7 +9,7 @@ type DepartamentoData = {
   alcaldes: { [municipio: string]: string | null };
 };
 
-const DropdownsComponent: React.FC = () => {
+const Alcalde: React.FC = () => {
   const [departamento, setDepartamento] = useState<string | null>(null);
   const [municipios, setMunicipios] = useState<string[]>([]);
   const [filteredDepartamentos, setFilteredDepartamentos] = useState<string[]>([]);
@@ -21,6 +21,8 @@ const DropdownsComponent: React.FC = () => {
   const [departamentoData, setDepartamentoData] = useState<{ [key: string]: DepartamentoData }>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [alcaldesList, setAlcaldesList] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     const fetchMunicipios = async () => {
@@ -63,6 +65,18 @@ const DropdownsComponent: React.FC = () => {
     fetchMunicipios();
   }, []);
 
+  const fetchFilteredAlcaldes = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/api/people/Name?search=${searchTerm}`);
+      if (!response.ok) throw new Error('Error fetching alcaldes');
+      const data: { nombre: string }[] = await response.json();
+      setAlcaldesList(data.map((alcalde) => alcalde.nombre));
+    } catch (err: any) {
+      setError(err.message || 'Error fetching filtered alcaldes');
+      setAlcaldesList([]);
+    }
+  };
+
   const handleDepartamentoChange = (selectedDepartamento: string) => {
     setDepartamento(selectedDepartamento);
     const data = departamentoData[selectedDepartamento];
@@ -76,29 +90,26 @@ const DropdownsComponent: React.FC = () => {
   };
 
   const handleDepartamentoSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = event.target.value.toLowerCase();
-    const filtered = departamentos.filter((dep) =>
-      dep.toLowerCase().includes(searchTerm)
-    );
+    const term = event.target.value.toLowerCase();
+    const filtered = departamentos.filter((dep) => dep.toLowerCase().includes(term));
     setFilteredDepartamentos(filtered);
   };
 
   const handleMunicipioSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = event.target.value.toLowerCase();
-    const filtered = municipios.filter((mun) =>
-      mun.toLowerCase().includes(searchTerm)
-    );
+    const term = event.target.value.toLowerCase();
+    const filtered = municipios.filter((mun) => mun.toLowerCase().includes(term));
     setFilteredMunicipios(filtered);
   };
 
-  const toggleEditing = () => setIsEditing(!isEditing);
+  const toggleEditing = () => {
+    setIsEditing(!isEditing);
+    setSearchTerm(''); // Reset the search term when opening the modal
+  };
 
   const handleAlcaldeChange = (newAlcalde: string) => {
     setAlcalde(newAlcalde);
     toggleEditing();
   };
-
-  const alcaldesList = ['Alcalde A', 'Alcalde B', 'Alcalde C'];
 
   return (
     <div className="container mt-4">
@@ -180,7 +191,9 @@ const DropdownsComponent: React.FC = () => {
           {selectedMunicipio && (
             <div className="box p-3 border rounded">
               <h5 className="mb-3">Información del Municipio</h5>
-              <p><strong>Municipio:</strong> {selectedMunicipio}</p>
+              <p>
+                <strong>Municipio:</strong> {selectedMunicipio}
+              </p>
               <p>
                 <strong>Alcalde:</strong> {alcalde || 'No asignado'}{' '}
                 <AiOutlineEdit onClick={toggleEditing} style={{ cursor: 'pointer', color: 'blue' }} />
@@ -197,6 +210,19 @@ const DropdownsComponent: React.FC = () => {
                     <button type="button" className="btn-close" onClick={toggleEditing}></button>
                   </div>
                   <div className="modal-body">
+                    <input
+                      className="form-control mb-3"
+                      type="text"
+                      placeholder="Buscar alcalde..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <button
+                      className="btn btn-primary mb-3"
+                      onClick={fetchFilteredAlcaldes}
+                    >
+                      Buscar
+                    </button>
                     <ul className="list-group">
                       {alcaldesList.map((name, index) => (
                         <li
@@ -208,6 +234,9 @@ const DropdownsComponent: React.FC = () => {
                           {name}
                         </li>
                       ))}
+                      {alcaldesList.length === 0 && (
+                        <div className="text-muted">No se encontraron alcaldes</div>
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -220,4 +249,4 @@ const DropdownsComponent: React.FC = () => {
   );
 };
 
-export default DropdownsComponent;
+export default Alcalde;

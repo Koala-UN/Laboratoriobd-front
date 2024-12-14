@@ -1,5 +1,4 @@
- 
- 
+import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Importa Bootstrap CSS
 import 'bootstrap/dist/js/bootstrap.bundle.min'; // Importa Bootstrap JS
 import './App.css'; // Personalizaciones de estilo adicionales
@@ -7,9 +6,9 @@ import './App.css'; // Personalizaciones de estilo adicionales
 const NavbarComponent = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary w-100 shadow">
-      <a className="navbar-brand ms-3" href="#">
+      <Link className="navbar-brand ms-3" to="/">
         <strong>MunicipiosApp</strong>
-      </a>
+      </Link>
       <button
         className="navbar-toggler me-3"
         type="button"
@@ -25,14 +24,19 @@ const NavbarComponent = () => {
       <div className="collapse navbar-collapse" id="navbarNavDropdown">
         <ul className="navbar-nav me-auto ms-3">
           <li className="nav-item">
-            <a className="nav-link active" aria-current="page" href="#">
+            <Link className="nav-link" to="/personas">
               Personas
-            </a>
+            </Link>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="#">
-              Municipios
-            </a>
+            <Link className="nav-link" to="/viviendas">
+              Viviendas
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link" to="/alcalde">
+              Alcaldes
+            </Link>
           </li>
           <li className="nav-item dropdown">
             <a
@@ -47,29 +51,24 @@ const NavbarComponent = () => {
             </a>
             <ul className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
               <li>
-                <a className="dropdown-item" href="#">
+                <Link className="dropdown-item" to="/accion1">
                   Acción 1
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="dropdown-item" href="#">
+                <Link className="dropdown-item" to="/accion2">
                   Acción 2
-                </a>
+                </Link>
               </li>
               <li>
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <a className="dropdown-item" href="#">
+                <Link className="dropdown-item" to="/otra-opcion">
                   Otra opción
-                </a>
+                </Link>
               </li>
             </ul>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link disabled" href="#" tabIndex={-1} aria-disabled="true">
-              Deshabilitado
-            </a>
           </li>
         </ul>
         <form className="d-flex align-items-center me-3">
