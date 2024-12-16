@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Asegúrate de importar Bootstrap CSS
 import NavbarComponent from './App';
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Viviendas from './viviendas.tsx';
 import Personas from './personas.tsx';
@@ -18,6 +18,7 @@ root.render(
   <>
   <Router>
         <Routes>
+        <Route path="/" element={<Navigate to="/personas" />} />
 
           <Route path="/personas" element={
           <>
