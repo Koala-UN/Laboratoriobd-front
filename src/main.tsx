@@ -6,9 +6,10 @@ import NavbarComponent from './App';
 
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
-import Viviendas from './Viviendas.tsx';
+import Viviendas from './viviendas.tsx';
 import Personas from './personas.tsx';
 import Alcalde from './alcalde.tsx';
+import ZonasDropdownComponent from './zonas.tsx';
 
 const rootElement = document.getElementById('root')!;
 const root = createRoot(rootElement);
@@ -22,6 +23,12 @@ root.render(
           <>
             <NavbarComponent/>
             <Personas/>
+            </>
+            } ></Route> 
+          <Route path="/zonas" element={
+          <>
+            <NavbarComponent/>
+            <ZonasDropdownComponent/>
             </>
             } ></Route> 
            <Route path="/viviendas" element={

@@ -3,14 +3,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { AiFillEdit } from 'react-icons/ai';
 import { MdDelete } from 'react-icons/md';
 
-// TypeScript Type Definitions
 type Persona = {
   id: number;
   nombre: string;
   sexo: string;
   edad: number;
   telefono: string;
-  zona: string;
+  responsable_id?: number;
 };
 
 const Personas: React.FC = () => {
@@ -28,18 +27,17 @@ const Personas: React.FC = () => {
     sexo: '',
     edad: 0,
     telefono: '',
-    zona: '',
+    responsable_id: undefined,
   });
   const [editingPersona, setEditingPersona] = useState<Partial<Persona> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch Personas on component mount
   useEffect(() => {
     const fetchPersonas = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('http://localhost:4000/api/people/');
+        const response = await fetch('https://laboratoriobd.onrender.com/api/people/');
         if (!response.ok) throw new Error('Error fetching personas');
         const data: Persona[] = await response.json();
         setPersonas(data);
@@ -52,20 +50,17 @@ const Personas: React.FC = () => {
     fetchPersonas();
   }, []);
 
-  // Handle filters
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFilters({ ...filters, [name]: value });
   };
 
-  // Handle modal open/close
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => {
-    setNewPersona({ nombre: '', sexo: '', edad: 0, telefono: '', zona: '' });
+    setNewPersona({ nombre: '', sexo: '', edad: 0, telefono: '', responsable_id: undefined });
     setIsModalOpen(false);
   };
 
-  // Handle edit modal open/close
   const handleEditModalOpen = (persona: Persona) => {
     setEditingPersona(persona);
     setIsEditModalOpen(true);
@@ -74,66 +69,85 @@ const Personas: React.FC = () => {
     setEditingPersona(null);
     setIsEditModalOpen(false);
   };
-
-  // Add a new persona
   const handlePersonaAdd = async () => {
     try {
+      console.log("Adding persona:", newPersona);
       setIsLoading(true);
-      const response = await fetch('http://localhost:4000/api/people/', {
+      const payload = { ...newPersona };
+
+      const response = await fetch('https://laboratoriobd.onrender.com/api/people/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPersona),
+        body: JSON.stringify(payload),
       });
+      console.log("Response status:", response.status);
+
       if (!response.ok) throw new Error('Error adding persona');
-      const addedPersona: Persona = await response.json();
-      setPersonas([...personas, addedPersona]);
-      handleModalClose();
+      const data = await response.json();
+      console.log("Persona added successfully:", data);
+
+      window.location.reload();
     } catch (err: any) {
+      console.error("Error adding persona:", err.message);
       setError(err.message || 'Error adding persona');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Update an existing persona
   const handlePersonaUpdate = async () => {
     if (!editingPersona || !editingPersona.id) return;
 
     try {
+      console.log("Updating persona:", editingPersona);
       setIsLoading(true);
-      const response = await fetch(`http://localhost:4000/api/people/${editingPersona.id}`, {
+      const payload = {
+        nombre: editingPersona.nombre,
+        sexo: editingPersona.sexo,
+        edad: editingPersona.edad,
+        telefono: editingPersona.telefono,
+        responsable_id: editingPersona.responsable_id || null,
+      };
+
+      const response = await fetch(`https://laboratoriobd.onrender.com/api/people/${editingPersona.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingPersona),
+        body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error('Error updating persona');
-      const updatedPersona: Persona = await response.json();
+      console.log("Response status:", response.status);
 
-      // Update the state
-      setPersonas(personas.map((p) => (p.id === updatedPersona.id ? updatedPersona : p)));
-      handleEditModalClose();
+      if (!response.ok) throw new Error('Error updating persona');
+      const data = await response.json();
+      console.log("Persona updated successfully:", data);
+
+      window.location.reload();
     } catch (err: any) {
+      console.error("Error updating persona:", err.message);
       setError(err.message || 'Error updating persona');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Delete a persona
   const handlePersonaDelete = async (id: number) => {
     try {
+      console.log("Deleting persona with ID:", id);
       setIsLoading(true);
-      const response = await fetch(`http://localhost:4000/api/people/${id}`, { method: 'DELETE' });
+      const response = await fetch(`https://laboratoriobd.onrender.com/api/people/${id}`, { method: 'DELETE' });
+      console.log("Response status:", response.status);
+
       if (!response.ok) throw new Error('Error deleting persona');
-      setPersonas(personas.filter((persona) => persona.id !== id));
+      console.log("Persona deleted successfully with ID:", id);
+
+      window.location.reload();
     } catch (err: any) {
+      console.error("Error deleting persona:", err.message);
       setError(err.message || 'Error deleting persona');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Filter personas based on user input
   const filteredPersonas = personas.filter((persona) =>
     Object.entries(filters).every(([key, value]) =>
       value === '' ? true : String(persona[key as keyof Persona]).toLowerCase().includes(value.toLowerCase())
@@ -152,7 +166,6 @@ const Personas: React.FC = () => {
       {isLoading && <p>Loading...</p>}
       {error && <div className="alert alert-danger">{error}</div>}
 
-      {/* Filters */}
       <div className="row mb-4">
         <div className="col-md-3">
           <input
@@ -165,12 +178,7 @@ const Personas: React.FC = () => {
           />
         </div>
         <div className="col-md-3">
-          <select
-            name="sexo"
-            className="form-select"
-            value={filters.sexo}
-            onChange={handleFilterChange}
-          >
+          <select name="sexo" className="form-select" value={filters.sexo} onChange={handleFilterChange}>
             <option value="">Filtrar por sexo</option>
             <option value="Masculino">Masculino</option>
             <option value="Femenino">Femenino</option>
@@ -198,10 +206,8 @@ const Personas: React.FC = () => {
         </div>
       </div>
 
-      {/* Personas Table */}
       <PersonTable personas={filteredPersonas} onDelete={handlePersonaDelete} onEdit={handleEditModalOpen} />
 
-      {/* Add Persona Modal */}
       {isModalOpen && (
         <Modal
           title="Agregar Nueva Persona"
@@ -209,10 +215,10 @@ const Personas: React.FC = () => {
           setPersona={setNewPersona}
           onClose={handleModalClose}
           onSave={handlePersonaAdd}
+          personas={personas}
         />
       )}
 
-      {/* Edit Persona Modal */}
       {isEditModalOpen && editingPersona && (
         <Modal
           title="Editar Persona"
@@ -220,6 +226,7 @@ const Personas: React.FC = () => {
           setPersona={setEditingPersona}
           onClose={handleEditModalClose}
           onSave={handlePersonaUpdate}
+          personas={personas}
         />
       )}
     </div>
@@ -238,7 +245,7 @@ const PersonTable: React.FC<{
         <th>Sexo</th>
         <th>Edad</th>
         <th>Teléfono</th>
-        <th>Zona</th>
+        <th>Responsable</th>
         <th>Acciones</th>
       </tr>
     </thead>
@@ -249,7 +256,7 @@ const PersonTable: React.FC<{
           <td>{persona.sexo}</td>
           <td>{persona.edad}</td>
           <td>{persona.telefono}</td>
-          <td>{persona.zona}</td>
+          <td>{personas.find((p) => p.id === persona.responsable_id)?.nombre || 'Sin Responsable'}</td>
           <td>
             <button className="btn btn-primary btn-sm mx-1" onClick={() => onEdit(persona)}>
               <AiFillEdit />
@@ -270,7 +277,8 @@ const Modal: React.FC<{
   setPersona: React.Dispatch<React.SetStateAction<Partial<Omit<Persona, 'id'>>>>;
   onClose: () => void;
   onSave: () => void;
-}> = ({ title, persona, setPersona, onClose, onSave }) => (
+  personas: Persona[];
+}> = ({ title, persona, setPersona, onClose, onSave, personas }) => (
   <div className="modal show d-block" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
     <div className="modal-dialog">
       <div className="modal-content">
@@ -279,41 +287,62 @@ const Modal: React.FC<{
           <button type="button" className="btn-close" onClick={onClose}></button>
         </div>
         <div className="modal-body">
-          {Object.keys(persona).map((key) =>
-            key !== 'id' ? (
-              <div className="mb-3" key={key}>
-                <label className="form-label">{key.charAt(0).toUpperCase() + key.slice(1)}</label>
-                {key === 'sexo' ? (
-                  <select
-                    className="form-select"
-                    value={persona[key as keyof Persona] as string}
-                    onChange={(e) =>
-                      setPersona((prev) => ({
-                        ...prev,
-                        [key]: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">Selecciona</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                  </select>
-                ) : (
-                  <input
-                    type={key === 'edad' ? 'number' : 'text'}
-                    className="form-control"
-                    value={persona[key as keyof Persona] as string}
-                    onChange={(e) =>
-                      setPersona((prev) => ({
-                        ...prev,
-                        [key]: key === 'edad' ? Number(e.target.value) : e.target.value,
-                      }))
-                    }
-                  />
-                )}
-              </div>
-            ) : null
-          )}
+          <div className="mb-3">
+            <label className="form-label">Nombre</label>
+            <input
+              type="text"
+              className="form-control"
+              value={persona.nombre || ''}
+              onChange={(e) => setPersona({ ...persona, nombre: e.target.value })}
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Sexo</label>
+            <select
+              className="form-select"
+              value={persona.sexo || ''}
+              onChange={(e) => setPersona({ ...persona, sexo: e.target.value })}
+            >
+              <option value="">Selecciona</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+            </select>
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Edad</label>
+            <input
+              type="number"
+              className="form-control"
+              value={persona.edad || ''}
+              onChange={(e) => setPersona({ ...persona, edad: Number(e.target.value) })}
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Teléfono</label>
+            <input
+              type="text"
+              className="form-control"
+              value={persona.telefono || ''}
+              onChange={(e) => setPersona({ ...persona, telefono: e.target.value })}
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Responsable</label>
+            <select
+              className="form-select"
+              value={persona.responsable_id || ''}
+              onChange={(e) =>
+                setPersona({ ...persona, responsable_id: Number(e.target.value) || undefined })
+              }
+            >
+              <option value="">Sin Responsable</option>
+              {personas.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre} {p.id === persona.responsable_id ? '(Actual)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>

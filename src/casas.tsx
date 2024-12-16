@@ -49,7 +49,7 @@
       const fetchDepartamentos = async () => {
         try {
           setIsLoading(true);
-          const response = await fetch('http://localhost:4000/api/departments');
+          const response = await fetch('https://laboratoriobd.onrender.com/api/departments');
           if (!response.ok) throw new Error('Error fetching departamentos');
           const data: Departamento[] = await response.json();
           setDepartamentos(data);
@@ -72,7 +72,7 @@
 
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:4000/api/municipalities/department/${departamento.id}`);
+        const response = await fetch(`https://laboratoriobd.onrender.com/api/municipalities/department/${departamento.id}`);
         if (!response.ok) throw new Error('Error fetching municipios');
         const data: Municipio[] = await response.json();
         setMunicipios(data);
@@ -92,7 +92,7 @@
 
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:4000/api/zone/municipio/${municipio.id}`);
+        const response = await fetch(`https://laboratoriobd.onrender.com/api/zone/municipio/${municipio.id}`);
         if (!response.ok) throw new Error('Error fetching zonas');
         const data: Zona[] = await response.json();
         setZonas(data);
@@ -111,7 +111,7 @@
       try {
         setIsLoading(true);
         setError(null);
-        const response = await fetch(`http://localhost:4000/api/houses/zone/${zona.id}`);
+        const response = await fetch(`https://laboratoriobd.onrender.com/api/houses/zone/${zona.id}`);
         if (!response.ok) throw new Error('Error fetching viviendas');
         const data: Vivienda[] = await response.json();
         setViviendas(data);

@@ -38,50 +38,12 @@ const NavbarComponent = () => {
               Alcaldes
             </Link>
           </li>
-          <li className="nav-item dropdown">
-            <a
-              className="nav-link dropdown-toggle"
-              href="#"
-              id="navbarDropdownMenuLink"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Más opciones
-            </a>
-            <ul className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <li>
-                <Link className="dropdown-item" to="/accion1">
-                  Acción 1
-                </Link>
-              </li>
-              <li>
-                <Link className="dropdown-item" to="/accion2">
-                  Acción 2
-                </Link>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li>
-                <Link className="dropdown-item" to="/otra-opcion">
-                  Otra opción
-                </Link>
-              </li>
-            </ul>
+          <li className="nav-item">
+            <Link className="nav-link" to="/zonas">
+              Zonas
+            </Link>
           </li>
         </ul>
-        <form className="d-flex align-items-center me-3">
-          <input
-            className="form-control me-2 rounded-pill"
-            type="search"
-            placeholder="Buscar..."
-            aria-label="Search"
-          />
-          <button className="btn btn-light btn-rounded" type="submit">
-            Buscar
-          </button>
-        </form>
       </div>
     </nav>
   );
