@@ -19,6 +19,7 @@ type Vivienda = {
   direccion: string;
   capacidad: number;
   niveles: number;
+  zona_id: number;
 };
 
 type Zona = {
@@ -59,9 +60,10 @@ const ViviendasDropdownComponent: React.FC = () => {
         const data: Departamento[] = await response.json();
         console.log('Departamentos fetched:', data);
         setDepartamentos(data);
-      } catch (err: any) {
-        console.error('Error fetching departamentos:', err.message);
-        setError(err.message || 'Error fetching data');
+      } catch (err) {
+        const error = err as Error;
+        console.error('Error fetching departamentos:', error.message);
+        setError(error.message || 'Error fetching data');
       } finally {
         setIsLoading(false);
       }
@@ -87,9 +89,10 @@ const ViviendasDropdownComponent: React.FC = () => {
       const data: Municipio[] = await response.json();
       console.log('Municipios fetched:', data);
       setMunicipios(data);
-    } catch (err: any) {
-      console.error('Error fetching municipios:', err.message);
-      setError(err.message || 'Error fetching data');
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error fetching municipios:', error.message);
+      setError(error.message || 'Error fetching data');
       setMunicipios([]);
     } finally {
       setIsLoading(false);
@@ -112,9 +115,10 @@ const ViviendasDropdownComponent: React.FC = () => {
       const data: Zona[] = await response.json();
       console.log('Zonas fetched:', data);
       setZonas(data);
-    } catch (err: any) {
-      console.error('Error fetching zonas:', err.message);
-      setError(err.message || 'Error fetching data');
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error fetching zonas:', error.message);
+      setError(error.message || 'Error fetching data');
       setZonas([]);
     } finally {
       setIsLoading(false);
@@ -135,9 +139,10 @@ const ViviendasDropdownComponent: React.FC = () => {
       const data: Vivienda[] = await response.json();
       console.log('Viviendas fetched:', data);
       setViviendas(data);
-    } catch (err: any) {
-      console.error('Error fetching viviendas:', err.message);
-      setError(err.message || 'Error fetching data');
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error fetching viviendas:', error.message);
+      setError(error.message || 'Error fetching data');
       setViviendas([]);
     } finally {
       setIsLoading(false);
@@ -154,9 +159,10 @@ const ViviendasDropdownComponent: React.FC = () => {
       const data: Persona[] = await response.json();
       console.log('Residentes fetched:', data);
       setResidentes(data);
-    } catch (err: any) {
-      console.error('Error fetching residentes:', err.message);
-      setError(err.message || 'Error fetching residentes');
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error fetching residentes:', error.message);
+      setError(error.message || 'Error fetching residentes');
       setResidentes([]);
     } finally {
       setIsLoading(false);
@@ -242,11 +248,14 @@ const ViviendasDropdownComponent: React.FC = () => {
     </div>
   );
 };
-
+interface Option {
+  id: number;
+  nombre: string;
+}
 const Dropdown: React.FC<{
   title: string;
   options: { id: number; nombre: string }[];
-  onSelect: (option: any) => void;
+  onSelect: (option: Option) => void;
   disabled?: boolean;
 }> = ({ title, options, onSelect, disabled }) => (
   <div className="dropdown">
@@ -362,9 +371,10 @@ const Modal: React.FC<{
       console.log('Updated vivienda:', updatedVivienda);
       onSave(updatedVivienda);
       window.location.reload();
-    } catch (err: any) {
-      console.error('Error updating vivienda:', err.message);
-      alert(err.message || 'Error al actualizar la vivienda');
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error updating vivienda:', error.message);
+      alert(error.message || 'Error al actualizar la vivienda');
     }
   };
 

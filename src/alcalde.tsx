@@ -12,10 +12,26 @@ type Municipio = {
   alcalde?: string; // Nuevo campo para el nombre del alcalde
 };
 
-type Persona = {
+interface Persona {
   id: number;
   nombre: string;
-};
+  sexo: string;
+  edad: string;
+  telefono: string;
+  responsable_id: number | null;
+  vivienda_id: number;
+}
+
+interface Municipio2 {
+  id: number;
+  nombre: string;
+  area: number;
+  presupuesto: number;
+  departamento_id: number;
+  alcalde_id: number;
+  departamento_nombre: string;
+  alcalde_nombre?: string;
+}
 
 const Alcalde: React.FC = () => {
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
@@ -29,12 +45,12 @@ const Alcalde: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [limit] = useState(5);
-  const [offset, setOffset] = useState(0);
+  const [offset] = useState(0);
 
   useEffect(() => {
     fetchDepartamentos();
   }, []);
-  const fetchDepartamentos = async () => {
+  const fetchDepartamentos = async (): Promise<void> => {
     try {
       console.log("Fetching departments...");
       setIsLoading(true);
@@ -42,13 +58,14 @@ const Alcalde: React.FC = () => {
       console.log("Departments response:", response);
   
       if (!response.ok) throw new Error('Failed to fetch departments');
-      const data = await response.json();
+      const data: Departamento[] = await response.json();
       console.log("Departments data:", data);
   
       setDepartamentos(data);
-    } catch (err: any) {
-      console.error("Error fetching departments:", err.message);
-      setError(err.message || 'Error fetching departments');
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error fetching departments:", error.message);
+      setError(error.message || 'Error fetching departments');
     } finally {
       setIsLoading(false);
     }
@@ -64,42 +81,44 @@ const Alcalde: React.FC = () => {
       console.log("Municipalities response:", response);
   
       if (!response.ok) throw new Error('Failed to fetch municipalities');
-      const data = await response.json();
+      const data: Municipio[] = await response.json();
       console.log("Municipalities data:", data);
   
       setMunicipios(data);
       setSelectedMunicipio(null);
-    } catch (err: any) {
-      console.error("Error fetching municipalities:", err.message);
-      setError(err.message || 'Error fetching municipalities');
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error fetching municipalities:", error.message);
+      setError(error.message || 'Error fetching municipalities');
     } finally {
       setIsLoading(false);
     }
   };
   
-  const fetchMunicipioAlcalde = async (municipioId: number) => {
-    try {
-      console.log(`Fetching municipality details for ID: ${municipioId}...`);
-      const response = await fetch(
-        `https://laboratoriobd.onrender.com/api/municipalities/${municipioId}`
-      );
-      console.log("Municipality details response:", response);
+const fetchMunicipioAlcalde = async (municipioId: number): Promise<void> => {
+  try {
+    console.log(`Fetching municipality details for ID: ${municipioId}...`);
+    const response = await fetch(
+      `https://laboratoriobd.onrender.com/api/municipalities/${municipioId}`
+    );
+    console.log("Municipality details response:", response);
+
+    if (!response.ok) throw new Error('Failed to fetch municipality details');
+    const data: Municipio2 = await response.json();
+    console.log("Municipality details data:", data);
+
+    const alcalde = data.alcalde_nombre || 'No asignado';
+    console.log("Alcalde:", alcalde);
+
+    setSelectedMunicipio({ ...data, alcalde });
+  } catch (err) {
+    const error = err as Error;
+    console.error("Error fetching municipality details:", error.message);
+    setError(error.message || 'Error fetching municipality details');
+  }
+};
   
-      if (!response.ok) throw new Error('Failed to fetch municipality details');
-      const data = await response.json();
-      console.log("Municipality details data:", data);
-  
-      const alcalde = data.alcalde_nombre || 'No asignado';
-      console.log("Alcalde:", alcalde);
-  
-      setSelectedMunicipio({ ...data, alcalde });
-    } catch (err: any) {
-      console.error("Error fetching municipality details:", err.message);
-      setError(err.message || 'Error fetching municipality details');
-    }
-  };
-  
-  const fetchPeopleList = async () => {
+  const fetchPeopleList = async (): Promise<void> => {
     try {
       console.log(`Fetching people list with limit=${limit} and offset=${offset}...`);
       setIsLoading(true);
@@ -109,14 +128,15 @@ const Alcalde: React.FC = () => {
       console.log("People list response:", response);
   
       if (!response.ok) throw new Error('Failed to fetch people list');
-      const data = await response.json();
+      const data: Persona[] = await response.json();
       console.log("People list data:", data);
   
       setPeopleList(data);
       setFilteredPeople(data);
-    } catch (err: any) {
-      console.error("Error fetching people list:", err.message);
-      setError(err.message || 'Error fetching people list');
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error fetching people list:", error.message);
+      setError(error.message || 'Error fetching people list');
     } finally {
       setIsLoading(false);
     }
@@ -146,9 +166,10 @@ const Alcalde: React.FC = () => {
       alert('Alcalde asignado correctamente');
       fetchMunicipioAlcalde(selectedMunicipio.id);
       setIsEditing(false);
-    } catch (err: any) {
-      console.error("Error assigning mayor:", err.message);
-      setError(err.message || 'Error assigning mayor');
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error assigning mayor:", error.message);
+      setError(error.message || 'Error assigning mayor');
     } finally {
       setIsLoading(false);
     }

@@ -30,7 +30,6 @@ const ZonasDropdownComponent: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newZona, setNewZona] = useState<Partial<Zona>>({ nombre: '', tipo_zona_id: 'vereda' });
   const [editingZona, setEditingZona] = useState<Zona | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,8 +42,9 @@ const ZonasDropdownComponent: React.FC = () => {
       if (!response.ok) throw new Error('Error fetching departamentos');
       const data: Departamento[] = await response.json();
       setDepartamentos(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
     }
   };
 
@@ -57,8 +57,9 @@ const ZonasDropdownComponent: React.FC = () => {
       if (!response.ok) throw new Error('Error fetching municipios');
       const data: Municipio[] = await response.json();
       setMunicipios(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
     }
   };
 
@@ -73,8 +74,9 @@ const ZonasDropdownComponent: React.FC = () => {
       if (!response.ok) throw new Error('Error fetching zonas');
       const data: Zona[] = await response.json();
       setZonas(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
     }
   };
   const handleAddOrEditZona = async () => {
@@ -101,8 +103,9 @@ const ZonasDropdownComponent: React.FC = () => {
       if (selectedMunicipio) {
         fetchZonas(selectedMunicipio.id); // Actualiza la lista de zonas
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
     }
   };
   
@@ -114,8 +117,9 @@ const ZonasDropdownComponent: React.FC = () => {
       const response = await fetch(`https://laboratoriobd.onrender.com/api/zone/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Error deleting zona');
       setZonas((prev) => prev.filter((z) => z.id !== id));
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
     }
   };
 

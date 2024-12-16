@@ -53,8 +53,9 @@
           if (!response.ok) throw new Error('Error fetching departamentos');
           const data: Departamento[] = await response.json();
           setDepartamentos(data);
-        } catch (err: any) {
-          setError(err.message || 'Error fetching data');
+        } catch (err) {
+          const error = err as Error;
+          setError(error.message || 'Error fetching data');
         } finally {
           setIsLoading(false);
         }
@@ -76,8 +77,9 @@
         if (!response.ok) throw new Error('Error fetching municipios');
         const data: Municipio[] = await response.json();
         setMunicipios(data);
-      } catch (err: any) {
-        setError(err.message || 'Error fetching data');
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || 'Error fetching data');
         setMunicipios([]);
       } finally {
         setIsLoading(false);
@@ -96,8 +98,9 @@
         if (!response.ok) throw new Error('Error fetching zonas');
         const data: Zona[] = await response.json();
         setZonas(data);
-      } catch (err: any) {
-        setError(err.message || 'Error fetching data');
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || 'Error fetching data');
         setZonas([]);
       } finally {
         setIsLoading(false);
@@ -115,8 +118,9 @@
         if (!response.ok) throw new Error('Error fetching viviendas');
         const data: Vivienda[] = await response.json();
         setViviendas(data);
-      } catch (err: any) {
-        setError(err.message || 'Error fetching data');
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || 'Error fetching data');
         setViviendas([]);
       } finally {
         setIsLoading(false);

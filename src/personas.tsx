@@ -12,6 +12,7 @@ type Persona = {
   responsable_id?: number;
 };
 
+
 const Personas: React.FC = () => {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [filters, setFilters] = useState({
@@ -33,6 +34,9 @@ const Personas: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
+
+  
   useEffect(() => {
     const fetchPersonas = async () => {
       try {
@@ -41,8 +45,9 @@ const Personas: React.FC = () => {
         if (!response.ok) throw new Error('Error fetching personas');
         const data: Persona[] = await response.json();
         setPersonas(data);
-      } catch (err: any) {
-        setError(err.message || 'Error fetching personas');
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || 'Error fetching personas');
       } finally {
         setIsLoading(false);
       }
@@ -87,9 +92,10 @@ const Personas: React.FC = () => {
       console.log("Persona added successfully:", data);
 
       window.location.reload();
-    } catch (err: any) {
-      console.error("Error adding persona:", err.message);
-      setError(err.message || 'Error adding persona');
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error adding persona:", error.message);
+      setError(error.message || 'Error adding persona');
     } finally {
       setIsLoading(false);
     }
@@ -121,9 +127,10 @@ const Personas: React.FC = () => {
       console.log("Persona updated successfully:", data);
 
       window.location.reload();
-    } catch (err: any) {
-      console.error("Error updating persona:", err.message);
-      setError(err.message || 'Error updating persona');
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error updating persona:", error.message);
+      setError(error.message || 'Error updating persona');
     } finally {
       setIsLoading(false);
     }
@@ -140,9 +147,10 @@ const Personas: React.FC = () => {
       console.log("Persona deleted successfully with ID:", id);
 
       window.location.reload();
-    } catch (err: any) {
-      console.error("Error deleting persona:", err.message);
-      setError(err.message || 'Error deleting persona');
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error deleting persona:", error.message);
+      setError(error.message || 'Error deleting persona');
     } finally {
       setIsLoading(false);
     }
@@ -220,7 +228,7 @@ const Personas: React.FC = () => {
       )}
 
       {isEditModalOpen && editingPersona && (
-        <Modal
+        <ModalEdit
           title="Editar Persona"
           persona={editingPersona}
           setPersona={setEditingPersona}
@@ -275,6 +283,92 @@ const Modal: React.FC<{
   title: string;
   persona: Partial<Omit<Persona, 'id'>>;
   setPersona: React.Dispatch<React.SetStateAction<Partial<Omit<Persona, 'id'>>>>;
+  onClose: () => void;
+  onSave: () => void;
+  personas: Persona[];
+}> = ({ title, persona, setPersona, onClose, onSave, personas }) => (
+  <div className="modal show d-block" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">{title}</h5>
+          <button type="button" className="btn-close" onClick={onClose}></button>
+        </div>
+        <div className="modal-body">
+          <div className="mb-3">
+            <label className="form-label">Nombre</label>
+            <input
+              type="text"
+              className="form-control"
+              value={persona.nombre || ''}
+              onChange={(e) => setPersona({ ...persona, nombre: e.target.value })}
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Sexo</label>
+            <select
+              className="form-select"
+              value={persona.sexo || ''}
+              onChange={(e) => setPersona({ ...persona, sexo: e.target.value })}
+            >
+              <option value="">Selecciona</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+            </select>
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Edad</label>
+            <input
+              type="number"
+              className="form-control"
+              value={persona.edad || ''}
+              onChange={(e) => setPersona({ ...persona, edad: Number(e.target.value) })}
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Teléfono</label>
+            <input
+              type="text"
+              className="form-control"
+              value={persona.telefono || ''}
+              onChange={(e) => setPersona({ ...persona, telefono: e.target.value })}
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Responsable</label>
+            <select
+              className="form-select"
+              value={persona.responsable_id || ''}
+              onChange={(e) =>
+                setPersona({ ...persona, responsable_id: Number(e.target.value) || undefined })
+              }
+            >
+              <option value="">Sin Responsable</option>
+              {personas.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre} {p.id === persona.responsable_id ? '(Actual)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>
+            Cancelar
+          </button>
+          <button className="btn btn-primary" onClick={onSave}>
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ModalEdit: React.FC<{
+  title: string;
+  persona: Partial<Persona>;
+  setPersona: React.Dispatch<React.SetStateAction<Partial<Persona> | null>>;
   onClose: () => void;
   onSave: () => void;
   personas: Persona[];
