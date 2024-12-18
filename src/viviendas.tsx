@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { AiFillEdit } from 'react-icons/ai';
 import { MdDelete } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 
 // TypeScript Type Definitions
 type Departamento = {
@@ -32,6 +33,7 @@ type Persona = {
   nombre: string;
 };
 
+
 const ViviendasDropdownComponent: React.FC = () => {
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
@@ -49,7 +51,7 @@ const ViviendasDropdownComponent: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  
   useEffect(() => {
     const fetchDepartamentos = async () => {
       try {
@@ -331,6 +333,7 @@ const Modal: React.FC<{
   onSave: (updatedVivienda: Vivienda) => void;
 }> = ({ vivienda, onClose, onSave }) => {
   const [formData, setFormData] = useState<Vivienda>(vivienda);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -341,6 +344,7 @@ const Modal: React.FC<{
   };
 
   const handleSave = async () => {
+    
     console.log('Saving vivienda:', formData);
     try {
       const payload = {
@@ -370,7 +374,9 @@ const Modal: React.FC<{
       const updatedVivienda = await response.json();
       console.log('Updated vivienda:', updatedVivienda);
       onSave(updatedVivienda);
-      window.location.reload();
+      
+      navigate('/viviendas');
+      
     } catch (err) {
       const error = err as Error;
       console.error('Error updating vivienda:', error.message);

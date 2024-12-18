@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { AiFillEdit } from 'react-icons/ai';
 import { MdDelete } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 
 type Persona = {
   id: number;
@@ -33,6 +34,7 @@ const Personas: React.FC = () => {
   const [editingPersona, setEditingPersona] = useState<Partial<Persona> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
 
 
@@ -90,8 +92,8 @@ const Personas: React.FC = () => {
       if (!response.ok) throw new Error('Error adding persona');
       const data = await response.json();
       console.log("Persona added successfully:", data);
-
-      window.location.reload();
+      if (isModalOpen) setIsModalOpen(false);
+      navigate('/personas');
     } catch (err) {
       const error = err as Error;
       console.error("Error adding persona:", error.message);
@@ -125,8 +127,8 @@ const Personas: React.FC = () => {
       if (!response.ok) throw new Error('Error updating persona');
       const data = await response.json();
       console.log("Persona updated successfully:", data);
-
-      window.location.reload();
+      if (isEditModalOpen) setIsEditModalOpen(false);
+      navigate('/personas');
     } catch (err) {
       const error = err as Error;
       console.error("Error updating persona:", error.message);
@@ -146,7 +148,7 @@ const Personas: React.FC = () => {
       if (!response.ok) throw new Error('Error deleting persona');
       console.log("Persona deleted successfully with ID:", id);
 
-      window.location.reload();
+      navigate('/personas');
     } catch (err) {
       const error = err as Error;
       console.error("Error deleting persona:", error.message);
