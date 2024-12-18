@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { AiFillEdit } from 'react-icons/ai';
 import { MdDelete } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
 
 // TypeScript Type Definitions
 type Departamento = {
@@ -333,7 +332,6 @@ const Modal: React.FC<{
   onSave: (updatedVivienda: Vivienda) => void;
 }> = ({ vivienda, onClose, onSave }) => {
   const [formData, setFormData] = useState<Vivienda>(vivienda);
-  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -375,7 +373,7 @@ const Modal: React.FC<{
       console.log('Updated vivienda:', updatedVivienda);
       onSave(updatedVivienda);
       
-      navigate('/viviendas');
+      window.location.reload();
       
     } catch (err) {
       const error = err as Error;
