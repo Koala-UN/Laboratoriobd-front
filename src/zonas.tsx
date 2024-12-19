@@ -179,7 +179,7 @@ const ZonasDropdownComponent: React.FC = () => {
         </div>
 
         {/* Add Zona Button */}
-        <button className="btn btn-success" onClick={openModalForAdd}>
+        <button className="btn btn-success" onClick={openModalForAdd} disabled={!selectedMunicipio}>
           <MdAdd /> Agregar Zona
         </button>
       </div>
