@@ -46,6 +46,7 @@ const Alcalde: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [limit] = useState(5);
   const [offset] = useState(0);
+  const [municipiosData, setMunicipiosData] = useState<Municipio2[]>([]);
 
   useEffect(() => {
     fetchDepartamentos();
@@ -183,6 +184,24 @@ const fetchMunicipioAlcalde = async (municipioId: number): Promise<void> => {
     setFilteredPeople(filtered);
   };
 
+
+  const fetchMunicipiosData = async () => {
+    try {
+      console.log('Fetching municipios data...');
+      setIsLoading(true);
+      const response = await fetch('https://laboratoriobd.onrender.com/api/municipalities');
+      if (!response.ok) throw new Error('Error fetching municipios data');
+      const data: Municipio2[] = await response.json();
+      setMunicipiosData(data);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Error fetching municipios data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <div className="container mt-4">
       {isLoading && <div className="text-center my-3">Loading...</div>}
@@ -280,8 +299,79 @@ const fetchMunicipioAlcalde = async (municipioId: number): Promise<void> => {
           </div>
         </div>
       )}
+      
+      
+      <div className="mt-9">
+        <h3> </h3>
+        <div className='mb-5'></div>
+        <div className='mb-5'></div>
+        <div className='m-7'></div>
+        <button className="btn btn-secondary mb-3" onClick={fetchMunicipiosData}>
+        Listar todos los alcaldes y municipios
+        </button>
+        <MunicipiosTable municipios={municipiosData} />
+      </div>
     </div>
   );
 };
+
+
+const MunicipiosTable: React.FC<{ municipios: Municipio2[] }> = ({ municipios }) => {
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Municipio2; direction: 'ascending' | 'descending' } | null>(null);
+
+  const sortedMunicipios = React.useMemo(() => {
+    const sortableMunicipios = [...municipios];
+    if (sortConfig !== null) {
+      sortableMunicipios.sort((a, b) => {
+        const aValue = a[sortConfig.key] ?? '';
+        const bValue = b[sortConfig.key] ?? '';
+        if (aValue < bValue) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableMunicipios;
+  }, [municipios, sortConfig]);
+
+  const requestSort = (key: keyof Municipio2) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  return (
+    <table className="table">
+      <thead>
+        <tr>
+          <th onClick={() => requestSort('nombre')} style={{ cursor: 'pointer' }}>
+            Municipio {sortConfig?.key === 'nombre' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : null}
+          </th>
+          <th onClick={() => requestSort('departamento_nombre')} style={{ cursor: 'pointer' }}>
+            Departamento {sortConfig?.key === 'departamento_nombre' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : null}
+          </th>
+          <th onClick={() => requestSort('alcalde_nombre')} style={{ cursor: 'pointer' }}>
+            Alcalde {sortConfig?.key === 'alcalde_nombre' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : null}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {sortedMunicipios.map((municipio) => (
+          <tr key={municipio.id}>
+            <td>{municipio.nombre}</td>
+            <td>{municipio.departamento_nombre}</td>
+            <td>{municipio.alcalde_nombre || 'Sin Alcalde'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};
+
 
 export default Alcalde;
