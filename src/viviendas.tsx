@@ -50,7 +50,10 @@ const ViviendasDropdownComponent: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newVivienda, setNewVivienda] = useState<Vivienda | null>(null);
+
   useEffect(() => {
     const fetchDepartamentos = async () => {
       try {
@@ -182,6 +185,24 @@ const ViviendasDropdownComponent: React.FC = () => {
     setIsModalOpen(false);
   };
 
+  const handleAddVivienda = () => {
+    console.log('Adding new vivienda');
+    setNewVivienda({
+      id: 0,
+      direccion: '',
+      capacidad: 0,
+      niveles: 0,
+      zona_id: selectedZona?.id || 0,
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddModalClose = () => {
+    console.log('Closing add modal...');
+    setNewVivienda(null);
+    setIsAddModalOpen(false);
+  };
+
   return (
     <div className="container mt-4">
       {isLoading && <div>Loading...</div>}
@@ -207,6 +228,10 @@ const ViviendasDropdownComponent: React.FC = () => {
               disabled={!selectedMunicipio}
             />
           </div>
+
+          <button className="btn btn-success mb-4" onClick={handleAddVivienda}>
+            Agregar Vivienda
+          </button>
 
           <ViviendasTable
             viviendas={viviendas}
@@ -243,6 +268,19 @@ const ViviendasDropdownComponent: React.FC = () => {
               prev.map((v) => (v.id === updatedVivienda.id ? updatedVivienda : v))
             );
             handleModalClose();
+          }}
+        />
+      )}
+
+      {isAddModalOpen && newVivienda && (
+        <AddModal
+          vivienda={newVivienda}
+          zonas={zonas}
+          onClose={handleAddModalClose}
+          onSave={(createdVivienda) => {
+            console.log('Saving new vivienda:', createdVivienda);
+            setViviendas((prev) => [...prev, createdVivienda]);
+            handleAddModalClose();
           }}
         />
       )}
@@ -297,8 +335,8 @@ const ViviendasTable: React.FC<{
       </tr>
     </thead>
     <tbody>
-      {viviendas.map((vivienda) => (
-        <tr key={vivienda.id}>
+      {viviendas.map((vivienda, index) => (
+        <tr key={index}>
           <td>{vivienda.direccion}</td>
           <td>{vivienda.capacidad}</td>
           <td>{vivienda.niveles}</td>
@@ -342,7 +380,7 @@ const Modal: React.FC<{
   };
 
   const handleSave = async () => {
-    
+
     console.log('Saving vivienda:', formData);
     try {
       const payload = {
@@ -372,9 +410,9 @@ const Modal: React.FC<{
       const updatedVivienda = await response.json();
       console.log('Updated vivienda:', updatedVivienda);
       onSave(updatedVivienda);
-      
+
       window.location.reload();
-      
+
     } catch (err) {
       const error = err as Error;
       console.error('Error updating vivienda:', error.message);
@@ -420,6 +458,139 @@ const Modal: React.FC<{
                 value={formData.niveles}
                 onChange={handleChange}
               />
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-secondary" onClick={onClose}>
+              Cancelar
+            </button>
+            <button className="btn btn-primary" onClick={handleSave}>
+              Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AddModal: React.FC<{
+  vivienda: Vivienda;
+  zonas: Zona[];
+  onClose: () => void;
+  onSave: (createdVivienda: Vivienda) => void;
+}> = ({ vivienda, zonas, onClose, onSave }) => {
+  const [formData, setFormData] = useState<Omit<Vivienda, 'id'>>({
+    direccion: vivienda.direccion,
+    capacidad: vivienda.capacidad,
+    niveles: vivienda.niveles,
+    zona_id: vivienda.zona_id,
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'capacidad' || name === 'niveles' || name === 'zona_id' ? Number(value) : value,
+    }));
+  };
+
+  const handleSave = async () => {
+    console.log('Saving new vivienda:', formData);
+    try {
+      const payload = {
+        direccion: formData.direccion,
+        capacidad: Number(formData.capacidad),
+        niveles: Number(formData.niveles),
+        zona_id: Number(formData.zona_id),
+      };
+
+      console.log('Payload to send:', payload);
+      const response = await fetch('https://laboratoriobd.onrender.com/api/houses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear la vivienda');
+      }
+
+      const data = await response.json();
+      console.log('Created vivienda:', data);
+      const houseid = data.houseId;
+    const createdVivienda: Vivienda = {
+      id: houseid,
+      direccion: formData.direccion,
+      capacidad: formData.capacidad,
+      niveles: formData.niveles,
+      zona_id: formData.zona_id,
+    };
+    onSave(createdVivienda);
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error creating vivienda:', error.message);
+      alert(error.message || 'Error al crear la vivienda');
+    }
+  };
+
+  return (
+    <div className="modal show d-block">
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Agregar Vivienda</h5>
+            <button type="button" className="btn-close" onClick={onClose}></button>
+          </div>
+          <div className="modal-body">
+            <div className="mb-3">
+              <label className="form-label">Dirección</label>
+              <input
+                type="text"
+                className="form-control"
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Capacidad</label>
+              <input
+                type="number"
+                className="form-control"
+                name="capacidad"
+                value={formData.capacidad}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Niveles</label>
+              <input
+                type="number"
+                className="form-control"
+                name="niveles"
+                value={formData.niveles}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Zona</label>
+              <select
+                className="form-select"
+                name="zona_id"
+                value={formData.zona_id}
+                onChange={handleChange}
+              >
+                <option value="">Selecciona una zona</option>
+                {zonas.map((zona) => (
+                  <option key={zona.id} value={zona.id}>
+                    {zona.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="modal-footer">
