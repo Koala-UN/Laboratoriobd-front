@@ -30,10 +30,15 @@ type Zona = {
 type Persona = {
   id: number;
   nombre: string;
+  vivienda_id: number | null; // Add vivienda_id to represent assignment status
 };
 
 
+
 const ViviendasDropdownComponent: React.FC = () => {
+  const [showAddResidentModal, setShowAddResidentModal] = useState(false);
+  const [targetVivienda, setTargetVivienda] = useState<Vivienda | null>(null);
+  const [availablePeople, setAvailablePeople] = useState<Persona[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
@@ -75,7 +80,7 @@ const ViviendasDropdownComponent: React.FC = () => {
 
     fetchDepartamentos();
   }, []);
-
+ 
   const handleDepartamentoChange = async (departamento: Departamento) => {
     console.log('Selected departamento:', departamento);
     setSelectedDepartamento(departamento);
@@ -172,6 +177,90 @@ const ViviendasDropdownComponent: React.FC = () => {
       setIsLoading(false);
     }
   };
+  const fetchAvailablePeople = async () => {
+  try {
+    console.log('Fetching all people...');
+    setIsLoading(true);
+    const response = await fetch('https://laboratoriobd.onrender.com/api/people/');
+    if (!response.ok) throw new Error('Error fetching people');
+    const data: Persona[] = await response.json();
+    console.log('People fetched:', data);
+    setAvailablePeople(data);
+  } catch (err) {
+    const error = err as Error;
+    console.error('Error fetching people:', error.message);
+    setError(error.message || 'Error fetching people');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  const handleAddResidente = async (personaId: number, viviendaId: number) => {
+    console.log(`Adding resident with ID: ${personaId} to vivienda ID: ${viviendaId}`);
+    try {
+      setIsLoading(true);
+      const response = await fetch(`https://laboratoriobd.onrender.com/api/people/${personaId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ vivienda_id: viviendaId }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error adding resident');
+      }
+  
+      console.log(`Resident with ID ${personaId} successfully added to vivienda ID ${viviendaId}`);
+      
+      // Optionally, refresh the residents list for the specific vivienda
+      await handleViewResidentes({ id: viviendaId } as Vivienda);
+  
+      alert('Resident added successfully');
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error adding resident:', error.message);
+      alert(error.message || 'Error adding resident');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleDeleteResidente = async (personaId: number) => {
+    console.log(`Eliminando residente con ID: ${personaId}`);
+    try {
+      setIsLoading(true);
+      const response = await fetch(`https://laboratoriobd.onrender.com/api/people/${personaId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ vivienda_id: null }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al eliminar al residente');
+      }
+  
+      console.log(`Residente con ID ${personaId} eliminado.`);
+      // Actualiza la lista de residentes después de la eliminación
+      setResidentes((prev) => prev?.filter((residente) => residente.id !== personaId) || null);
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error al eliminar al residente:', error.message);
+      alert(error.message || 'Error al eliminar al residente');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
+
+
+
+
+
+
 
   const handleEditVivienda = (vivienda: Vivienda) => {
     console.log('Editing vivienda:', vivienda);
@@ -196,7 +285,12 @@ const ViviendasDropdownComponent: React.FC = () => {
     });
     setIsAddModalOpen(true);
   };
-
+  const handleAddResidentModalOpen = (vivienda: Vivienda) => {
+    console.log('Opening Add Resident Modal for vivienda:', vivienda);
+    setTargetVivienda(vivienda);
+    setShowAddResidentModal(true);
+    fetchAvailablePeople(); // Fetch people when the modal is opened
+  };
   const handleAddModalClose = () => {
     console.log('Closing add modal...');
     setNewVivienda(null);
@@ -229,15 +323,18 @@ const ViviendasDropdownComponent: React.FC = () => {
             />
           </div>
 
-          <button className="btn btn-success mb-4" onClick={handleAddVivienda}>
+          <button className="btn btn-success mb-4" onClick={handleAddVivienda}disabled={!selectedZona}>
             Agregar Vivienda
           </button>
 
           <ViviendasTable
-            viviendas={viviendas}
-            onEdit={handleEditVivienda}
-            onViewResidentes={handleViewResidentes}
-          />
+  viviendas={viviendas}
+  onEdit={handleEditVivienda}
+  onViewResidentes={handleViewResidentes}
+  onAddResident={handleAddResidentModalOpen}
+  
+/>
+
 
           {residentes && selectedVivienda && (
             <div className="mt-4">
@@ -247,6 +344,15 @@ const ViviendasDropdownComponent: React.FC = () => {
                   {residentes.map((persona) => (
                     <li key={persona.id} className="list-group-item">
                       {persona.nombre}
+                      <button
+              className="btn btn-danger btn-sm mx-2"
+              onClick={() => handleDeleteResidente(persona.id)}
+            >
+      
+              Eliminar
+            </button>
+
+
                     </li>
                   ))}
                 </ul>
@@ -255,8 +361,18 @@ const ViviendasDropdownComponent: React.FC = () => {
               )}
             </div>
           )}
+          
         </>
       )}
+{showAddResidentModal && targetVivienda && (
+  <AddResidentModal
+    vivienda={targetVivienda}
+    availablePeople={availablePeople}
+    onClose={() => setShowAddResidentModal(false)} // Close modal
+    onAdd={(persona) => handleAddResidente(persona.id, targetVivienda.id)} // Use handleAddResidente directly
+  />
+)}
+
 
       {isModalOpen && editingVivienda && (
         <Modal
@@ -291,6 +407,65 @@ interface Option {
   id: number;
   nombre: string;
 }
+const AddResidentModal: React.FC<{
+  vivienda: Vivienda;
+  availablePeople: Persona[];
+  onClose: () => void;
+  onAdd: (persona: Persona) => void;
+}> = ({ vivienda, availablePeople, onClose, onAdd }) => {
+  const [search, setSearch] = useState('');
+  const filteredPeople = availablePeople
+  .filter((persona) => persona.vivienda_id === null) // Exclude people with assigned vivienda_id
+  .filter((persona) =>
+    persona.nombre.toLowerCase().includes(search.toLowerCase()) // Apply search filter
+  );
+
+
+  return (
+    <div className="modal show d-block">
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Agregar Persona a {vivienda.direccion}</h5>
+            <button type="button" className="btn-close" onClick={onClose}></button>
+          </div>
+          <div className="modal-body">
+            <div className="mb-3">
+              <label className="form-label">Buscar Persona</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Ingresa el nombre"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <ul className="list-group">
+              {filteredPeople.map((persona) => (
+                <li key={persona.id} className="list-group-item d-flex justify-content-between align-items-center">
+                  {persona.nombre}
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => onAdd(persona)}
+                  >
+                    Agregar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-secondary" onClick={onClose}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 const Dropdown: React.FC<{
   title: string;
   options: { id: number; nombre: string }[];
@@ -324,7 +499,8 @@ const ViviendasTable: React.FC<{
   viviendas: Vivienda[];
   onEdit: (vivienda: Vivienda) => void;
   onViewResidentes: (vivienda: Vivienda) => void;
-}> = ({ viviendas, onEdit, onViewResidentes }) => (
+  onAddResident: (vivienda: Vivienda) => void; // Add this line
+}> = ({ viviendas, onEdit, onViewResidentes, onAddResident }) => (
   <table className="table table-bordered">
     <thead>
       <tr>
@@ -335,8 +511,8 @@ const ViviendasTable: React.FC<{
       </tr>
     </thead>
     <tbody>
-      {viviendas.map((vivienda, index) => (
-        <tr key={index}>
+      {viviendas.map((vivienda) => (
+        <tr key={vivienda.id}>
           <td>{vivienda.direccion}</td>
           <td>{vivienda.capacidad}</td>
           <td>{vivienda.niveles}</td>
@@ -347,6 +523,12 @@ const ViviendasTable: React.FC<{
                 onClick={() => onViewResidentes(vivienda)}
               >
                 Ver Residentes
+              </button>
+              <button
+                className="btn btn-success btn-sm me-2"
+                onClick={() => onAddResident(vivienda)} // Add this button
+              >
+                Agregar Persona
               </button>
               <button
                 className="btn btn-primary btn-sm me-2"
@@ -364,6 +546,7 @@ const ViviendasTable: React.FC<{
     </tbody>
   </table>
 );
+
 const Modal: React.FC<{
   vivienda: Vivienda;
   onClose: () => void;
